@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+    <!-- favicon -->
+    <link rel="icon" type="image/png" href="favicon-32x32.png" sizes="32x32" />
+    <link rel="icon" type="image/png" href="favicon-16x16.png" sizes="16x16" />
+    <title>Spider Solitaire</title>
+    <link rel="stylesheet" href="./index.css">
+    <style>
+        canvas {
+            background-color: rgb(0, 134, 0);
+        }
+
+    </style>
+</head>
+
+<body>
+    <!-- setting height and width in javascript -->
+    <canvas id="gameCanvas"></canvas>
+
+    <script src="./makeDeck.js"></script>
+    <script src="./randomColor.js"></script>
+    <script src="./dealCards.js"></script>
+    <script src="./drawCard.js"></script>
+
+    <script>
+
+        var deck = makeDeck(4);
+        console.log(JSON.stringify(deck));
+
+        var canvas = document.querySelector("#gameCanvas");
+        var ctx = canvas.getContext("2d");
+
+        var cardColumns = dealCards();
+
+        // padding between columns
+        var padding = 3;
+
+        // set canvas height and width
+        canvas.height = window.innerHeight;
+        canvas.width = window.innerWidth;
+
+        // canvas padding
+        var paddingCanvas = 20;
+
+        // column positioning
+        var topColumn = paddingCanvas + 20;
+        var leftColumn = paddingCanvas;
+
+        // card coordinates
+        var cardBox = [];
+
+        // any card at end of column is playable
+        for (var c = 0; c < cardColumns.length; c++) {
+            if (cardColumns[c].length > 0) {
+                cardColumns[c][cardColumns[c].length - 1].playable = true;
+            }
+        }
+
+        window.addEventListener("resize", resizeHandler);
+
+        canvas.addEventListener("click", mouseOverCardHandler);
+
+        function mouseOverCardHandler(e) {
+            mouseX = e.clientX;
+            mouseY = e.clientY;
+            console.log(`The mouse is at ${mouseX} x-coordinate and ${mouseY} y-coordinate.`);
+
+            // if click on card, make border highlighted
+            draw();
+            
+        }
+
+        function draw() {
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            canvas.height = window.innerHeight;
+            canvas.width = window.innerWidth;
+
+            var mouseX = window.clientX;
+            var mouseY = window.clientY;
+
+            // draw card columns
+            for (var c = 0; c < cardColumns.length; c++) {
+                for (var r = 0; r < cardColumns[c].length; r++) {
+                    // playing cards are 3.5H X 2.5W
+                    var cardHeight = Math.round(canvas.width / cardColumns.length) - padding;
+                    var cardWidth = Math.round((0.25 / 0.35) * cardHeight);
+
+                    // use topColumn and columnLeft
+                    var x = leftColumn + (cardWidth + padding) * c;
+                    var y = topColumn + Math.trunc(cardHeight / 5) * r;
+                    drawCard(x, y, mouseX, mouseY, cardColumns[c][r]);
+                }
+            }
+
+
+            requestAnimationFrame(draw);
+        }
+
+        function resizeHandler() {
+            console.log(`The canvas resized to ${canvas.height} high and ${canvas.width} wide.`);
+            draw();
+        }
+
+        console.log(cardColumns);
+
+        draw();
+    </script>
+</body>
+
+</html>
